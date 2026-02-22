@@ -37,7 +37,7 @@
  * [[TableOfContentsX? &input=`[[*content]]` &output=`toc` &tpl_outer=`@INLINE <h2>My table of Contents</h2><ol class="toc level-[[+level]]">[[+toc]]</ol>` &tpl_inner=`@INLINE <li class="my-toc"><a href="[[+anchor]]">[[+title]] &gt;</a>` &maxlevel=`3` &minlevel=`1` ]]
  * 
  * Options:
- * &outout - What should the snippet output? Either 'toc' or 'content' (default: 'toc')
+ * &output - What should the snippet output? Either 'toc' or 'content' (default: 'toc')
  * &tpl_outer - Customise the outer template of the TOC
  * &tpl_inner - Customise the inner template of the TOC
  * &minlevel - Minimum header level to include in the TOC (default: h1)
@@ -190,22 +190,35 @@ if (!function_exists('url_slug')) {
 
 // Content should be MODX input
 $content = $input;
-
-preg_match_all('/<h([1-6])([^>]*)>(.*?)<\/h\1>/is', $input, $matches, PREG_SET_ORDER);
-
 $anchors = [];
-foreach ($matches as $match) {
-    $level = intval($match[1]);
-    if ($level < $minlevel || $level > $maxlevel) continue;
-    
-    $title = trim($match[3]);
-    $anchor = url_slug($title, array('transliterate' => true));
-    $anchors[] = parseStringChunk($tpl_inner, [
-        'anchor' => '[[~[[*id]]]]#'.$anchor,
-        'title' => $title
-    ]);
-    $content = substr_replace($content, '<h'.$level.' id="'.$anchor.'"'.$match[2].'>'.$match[3].'</h'.$level.'>', strpos( $content, $match[0] ), strlen( $match[0] ) );
-}
+$used = [];
+
+// Prepare the content and extract headers ensuring if there are duplicate headers, they get unique anchors
+$content = preg_replace_callback(
+    '/<h([1-6])([^>]*)>(.*?)<\/h\1>/is',
+    function ($match) use ($minlevel, $maxlevel, &$anchors, &$used, $tpl_inner) {
+        $i = 1;
+        $level = intval($match[1]);
+        if ($level < $minlevel || $level > $maxlevel) {
+            return $match[0];
+        }
+
+        $title = trim(strip_tags($match[3]));
+        $anchor = url_slug($title, ['transliterate' => true]);
+
+        while (in_array($anchor, $used)) {
+            $anchor .= '-' . $i++;
+        }
+        $used[] = $anchor;
+        $anchors[] = parseStringChunk($tpl_inner, [
+            'anchor' => '[[~[[*id]]]]#'.$anchor,
+            'title' => $title
+        ]);
+
+        return '<h'.$level.' id="'.$anchor.'"'.$match[2].'>'.$match[3].'</h'.$level.'>';
+    },
+    $content
+);
 
 // Finally output the content
 if ($output == 'content') {
