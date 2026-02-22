@@ -18,17 +18,59 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.2
+ * @author Stewart Orr <stewart.orr@gmail.com>
+ * @version 1.3
+ * 
+ * 
+ * Usage:
+ * -----
+ * 
+ * Simple example to output of the table of contents as output filter:
+ * 
+ * [[*content:TableOfContentsX=`content`]]
+ * [[*content:TableOfContentsX=`toc`]]
+ * 
+ * Customise the output of the table of contents:
+ * 
+ * [[TableOfContentsX? &input=`[[*content]]` &output=`content` ]]
+ * [[TableOfContentsX? &input=`[[*content]]` &output=`toc` ]]
+ * [[TableOfContentsX? &input=`[[*content]]` &output=`toc` &tpl_outer=`@INLINE <h2>My table of Contents</h2><ol class="toc level-[[+level]]">[[+toc]]</ol>` &tpl_inner=`@INLINE <li class="my-toc"><a href="[[+anchor]]">[[+title]] &gt;</a>` &maxlevel=`3` &minlevel=`1` ]]
+ * 
+ * Options:
+ * &outout - What should the snippet output? Either 'toc' or 'content' (default: 'toc')
+ * &tpl_outer - Customise the outer template of the TOC
+ * &tpl_inner - Customise the inner template of the TOC
+ * &minlevel - Minimum header level to include in the TOC (default: h1)
+ * &maxlevel - Maximum header level to include in the TOC (default: h4)
+ * 
  */
 
 // Parameters/options
 // What should the snippet output? Either 'toc' or 'content'
 $options = isset($options) && ($options == 'content' || $options == 'toc') ? $options : 'toc';
+if (isset($options) && ($options == 'content' || $options == 'toc')) {
+    $output = $options;
+} else {
+    $output = isset($output) ? $output : 'toc';
+}
+$minlevel = isset($minlevel) ? $minlevel : 1; // Maximum of <h1>
+$maxlevel = isset($maxlevel) ? $maxlevel : 4; // Maximum of <h4>
+$tpl_outer = isset($tpl_outer) ? $tpl_outer : '@INLINE <ol class="toc level-[[+level]]">[[+toc]]</ol>';
+$tpl_inner = isset($tpl_inner) ? $tpl_inner : '@INLINE <li><a href="[[+anchor]]">[[+title]]</a>';
 
-// If you would prefer the content to be placeholders - DISABLED for now
-//$toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : FALSE ;
-//$toPlaceholderPrefix = isset($toPlaceholderPrefix) ? $toPlaceholderPrefix . "." : '' ; // If you want to prefix the placeholders
+if (!function_exists('parseStringChunk')) {
+    function parseStringChunk($string, $placeholders = array()) {
+        global $modx;
+        if (isset($string) && strpos($string, "@INLINE ") === 0) {
+            $string = str_replace("@INLINE ", "", $string);
+            $chunk = $modx->newObject('modChunk');
+            $chunk->setContent($string);
+            return $chunk->process($placeholders);
+        } else {
+            return $modx->getChunk($string, $placeholders);
+        }
+    }
+}
 
 if (!function_exists('url_slug')) {
 
@@ -146,87 +188,31 @@ if (!function_exists('url_slug')) {
 
 }
 
-preg_match_all('/<h([1-6])()>([^<]+)<\/h[1-6]>/i', $input, $matches, PREG_SET_ORDER);
-
-$anchors = array();
-$toc     = '<ol class="toc">'."\n";
-$i       = 0;
-
 // Content should be MODX input
 $content = $input;
 
-foreach ($matches as $heading) {
+preg_match_all('/<h([1-6])([^>]*)>(.*?)<\/h\1>/is', $input, $matches, PREG_SET_ORDER);
 
-    if ($i == 0)
-        $startlvl = $heading[1];
-        $lvl = $heading[1];
-
-    $ret = preg_match( '/id=[\'|"](.*)?[\'|"]/i', stripslashes($heading[2]), $anchor );
-    if ( $ret && $anchor[1] != '' ) {
-        $anchor = stripslashes( $anchor[1] );
-        $add_id = false;
-    } else {
-        $anchor = url_slug($heading[3], array('transliterate' => true)); // preg_replace( '/\s+/', '-', preg_replace('/[^a-z\s]/', '', strtolower( $heading[3] ) ) );
-        $add_id = true;
-    }
-
-    if ( !in_array( $anchor, $anchors ) ) {
-        $anchors[] = $anchor;
-    } else {
-        $orig_anchor = $anchor;
-        $i = 2;
-        while ( in_array( $anchor, $anchors ) ) {
-            $anchor = $orig_anchor.'-'.$i;
-            $i++;
-        }
-        $anchors[] = $anchor;
-    }
-
-    if ($add_id) {
-        $content = substr_replace( $content, '<h'.$lvl.' id="'.$anchor.'"'.$heading[2].'>'.$heading[3].'</h'.$lvl.'>', strpos( $content, $heading[0] ), strlen( $heading[0] ) );
-    }
-
-    $ret = preg_match( '/title=[\'|"](.*)?[\'|"]/i', stripslashes( $heading[2] ), $title );
-    if ( $ret && $title[1] != '' )
-        $title = stripslashes( $title[1] );
-    else
-        $title = $heading[3];
-    $title      = trim( strip_tags( $title ) );
-
-    if ($i > 0) {
-        if ($prevlvl < $lvl) {
-            $toc .= "\n"."<ol>"."\n";
-        } else if ($prevlvl > $lvl) {
-            $toc .= '</li>'."\n";
-            while ($prevlvl > $lvl) {
-                $toc .= "</ol>"."\n".'</li>'."\n";
-                $prevlvl--;
-            }
-        } else {
-            $toc .= '</li>'."\n";
-        }
-    }
-
-    $j = 0;
-    $toc .= '<li><a href="[[~[[*id]]]]#'.$anchor.'">'.$title.'</a>';
-    $prevlvl = $lvl;
-
-    $i++;
+$anchors = [];
+foreach ($matches as $match) {
+    $level = intval($match[1]);
+    if ($level < $minlevel || $level > $maxlevel) continue;
+    
+    $title = trim($match[3]);
+    $anchor = url_slug($title, array('transliterate' => true));
+    $anchors[] = parseStringChunk($tpl_inner, [
+        'anchor' => '[[~[[*id]]]]#'.$anchor,
+        'title' => $title
+    ]);
+    $content = substr_replace($content, '<h'.$level.' id="'.$anchor.'"'.$match[2].'>'.$match[3].'</h'.$level.'>', strpos( $content, $match[0] ), strlen( $match[0] ) );
 }
-
-unset( $anchors );
-
-while ( $lvl > $startlvl ) {
-    $toc .= "\n</ol>";
-    $lvl--;
-}
-
-$toc .= '</li>'."\n";
-$toc .= '</ol>'."\n";
 
 // Finally output the content
-if ($options == 'content') {
+if ($output == 'content') {
     echo $content;
 } else {
-    echo $toc;
+    echo parseStringChunk($tpl_outer, [
+        'toc' => implode(PHP_EOL, $anchors),
+        'level' => '0'
+    ]);
 }
