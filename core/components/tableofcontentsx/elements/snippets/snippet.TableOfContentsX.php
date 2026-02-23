@@ -56,7 +56,7 @@ if (isset($options) && ($options == 'content' || $options == 'toc')) {
 $minlevel = isset($minlevel) ? $minlevel : 1; // Maximum of <h1>
 $maxlevel = isset($maxlevel) ? $maxlevel : 4; // Maximum of <h4>
 $tpl_outer = isset($tpl_outer) ? $tpl_outer : '@INLINE <ol class="toc level-[[+level]]">[[+toc]]</ol>';
-$tpl_inner = isset($tpl_inner) ? $tpl_inner : '@INLINE <li><a href="[[+anchor]]">[[+title]]</a>';
+$tpl_inner = isset($tpl_inner) ? $tpl_inner : '@INLINE <li><a href="[[+anchor]]">[[+title]]</a></li>';
 
 if (!function_exists('parseStringChunk')) {
     function parseStringChunk($string, $placeholders = array()) {
