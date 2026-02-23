@@ -1,28 +1,23 @@
 Changelog for TableOfContentsX package. 
 
 TableOfContentsX 1.3 - 22/02/2026
-===================================== 
 
 - Added new options to control templating, minimum and maximum headers.
 - Updated code to allow for header tags with attributes and child tags
 - Updated to work correctly with duplicate header titles
 
 TableOfContentsX 1.2 - 12/07/2019
-===================================== 
 
 - Fixing an issue special characters in a heading breaking the page anchors.
 
 TableOfContentsX 1.1 - 13/12/2017
-===================================== 
 
 - Fixing an issue with installing on 2.6.0
 
 TableOfContentsX 1.0.1 - 28/08/2013
-===================================== 
 
 - Missed off the url relative to the document, breaks sites with <base> 
 
 TableOfContentsX 1.0 - 23/08/2013
-===================================== 
 
 - First version - I hope you find it useful!
