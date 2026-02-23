@@ -64,26 +64,44 @@ $builder->package->put(
 );
 
 /*------------------------------------------------------------------------------
-    Snippets
+    Category
+------------------------------------------------------------------------------*/
+
+$category = $modx->newObject('modCategory');
+$category->set('category', PKG_NAME);
+
+/*------------------------------------------------------------------------------
+    Snippets (owned by category)
 ------------------------------------------------------------------------------*/
 
 $snippets = include $sources['data'] . 'transport.snippets.php';
-
 if (empty($snippets)) {
     $modx->log(modX::LOG_LEVEL_ERROR, 'No snippets found.');
 } else {
-    foreach ($snippets as $snippet) {
-        $snippet->set('category', 0);
-        $builder->putVehicle(
-            $builder->createVehicle($snippet, [
-                xPDOTransport::UNIQUE_KEY => 'name',
-                xPDOTransport::PRESERVE_KEYS => false,
-                xPDOTransport::UPDATE_OBJECT => true,
-            ])
-        );
-    }
-    $modx->log(modX::LOG_LEVEL_INFO, '✅ Added ' . count($snippets) . ' uncategorized snippets.');
+    $category->addMany($snippets);
+    $modx->log(modX::LOG_LEVEL_INFO, '✅ Added ' . count($snippets) . ' snippets.');
 }
+
+/*------------------------------------------------------------------------------
+    Category Vehicle (THIS installs snippets correctly)
+------------------------------------------------------------------------------*/
+
+$categoryAttributes = [
+    xPDOTransport::UNIQUE_KEY => 'category',
+    xPDOTransport::PRESERVE_KEYS => false,
+    xPDOTransport::UPDATE_OBJECT => true,
+    xPDOTransport::RELATED_OBJECTS => true,
+    xPDOTransport::RELATED_OBJECT_ATTRIBUTES => [
+        'Snippets' => [
+            xPDOTransport::UNIQUE_KEY => 'name',
+            xPDOTransport::PRESERVE_KEYS => false,
+            xPDOTransport::UPDATE_OBJECT => true,
+        ],
+    ],
+];
+
+$categoryVehicle = $builder->createVehicle($category, $categoryAttributes);
+$builder->putVehicle($categoryVehicle);
 
 /*------------------------------------------------------------------------------
     Package Attributes

@@ -13,7 +13,7 @@ function getSnippetContent($filename = '') {
 $snippets = [];
 $snippet = $modx->newObject('modSnippet');
 $snippet->fromArray([
-    'name'        => 'TableOfContents',
+    'name'        => 'TableOfContentsX',
     'description' => 'This extra takes your MODX content and generates a customisable table of contents list based on the `h1`, `h2`, `h3`, `h4`, `h5`, and `h6` tags.',
     'snippet'     => getSnippetContent($sources['snippets'] . 'snippet.TableOfContentsX.php'),
 ], '', true, true);
