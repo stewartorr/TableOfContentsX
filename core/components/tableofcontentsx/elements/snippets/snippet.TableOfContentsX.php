@@ -30,7 +30,7 @@
  * 
  * [[TableOfContentsX? &input=`[[*content]]` &output=`content` ]]
  * [[TableOfContentsX? &input=`[[*content]]` &output=`toc` ]]
- * [[TableOfContentsX? &input=`[[*content]]` &output=`toc` &tpl_outer=`@INLINE <h2>My table of Contents</h2><ol class="toc level-[[+level]]">[[+toc]]</ol>` &tpl_inner=`@INLINE <li class="my-toc"><a href="[[+anchor]]">[[+title]] &gt;</a>` &maxlevel=`3` &minlevel=`1` ]]
+ * [[TableOfContentsX? &input=`[[*content]]` &output=`toc` &tpl_outer=`@INLINE <h2>My table of Contents</h2><ol class="toc level-[[+level]]">[[+toc]]</ol>` &tpl_inner=`@INLINE <li class="my-toc"><a href="[[+anchor]]">[[+title]] &gt;</a></li>` &maxlevel=`3` &minlevel=`1` ]]
  * 
  * Options:
  * &output - What should the snippet output? Either 'toc' or 'content' (default: 'toc')

@@ -6,6 +6,11 @@ It helps break down long articles and pages, making it easier for users to navig
 
 ![TableOfContentsX](docs/tableofcontentsx.png)
 
+
+## Installation
+
+The recommended method for installation is to use the MODX package manager browser and search for `TableOfContentsX` and install it there. If, for some reason, you cannot use the package manager, you can download the latest package and upload to `/core/packages/` and then *Search locally for Packages* under the *Download Extras* button and install from there.
+
 ## Snippet `TableOfContentsX`
 
 This is the only snippet included in the package. It accepts a template variable, chunk, or placeholder and generates a table of contents.
@@ -33,8 +38,8 @@ Example of using TableOfContentsX as an output filter on the `[[*content]]` reso
 | `&output`   | Output type: `toc` or `content` (default: `toc`) |
 | `&tpl_outer` | Custom outer template for the TOC |
 | `&tpl_inner` | Custom template for each TOC item |
-| `&minlevel` | Minimum heading level to include (default: `h1`) |
-| `&maxlevel` | Maximum heading level to include (default: `h4`) |
+| `&minlevel` | Minimum heading level to include (default: 1 = `h1`) |
+| `&maxlevel` | Maximum heading level to include (default: 4 = `h4`) |
 
 #### Examples:
 
@@ -78,7 +83,7 @@ You can either specify a chunk name or use `@INLINE` to define the template dire
 * `[[+anchor]]` The page anchor used in the `<a>` tag
 * `[[+title]]` The heading link title
 
-## Further info
+## Documentation & more info
 
 For information and support, check out my blog:
 
