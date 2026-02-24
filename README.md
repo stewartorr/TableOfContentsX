@@ -1,4 +1,4 @@
-# TableOfContentsX v1.3
+# TableOfContentsX v1.3.1
 
 This extra takes your MODX content and generates an ordered list table of contents based on the `h1`, `h2`, `h3`, `h4`, `h5`, and `h6` tags. 
 
