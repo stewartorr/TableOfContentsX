@@ -15,7 +15,7 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * @author Stewart Orr <stewart.orr@gmail.com>
- * @version 1.3
+ * @version 1.3.1
  * 
  * 
  * Usage:
