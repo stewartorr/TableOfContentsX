@@ -43,7 +43,6 @@
 
 // Parameters/options
 // What should the snippet output? Either 'toc' or 'content'
-$options = isset($options) && ($options == 'content' || $options == 'toc') ? $options : 'toc';
 if (isset($options) && ($options == 'content' || $options == 'toc')) {
     $output = $options;
 } else {
